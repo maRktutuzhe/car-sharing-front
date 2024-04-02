@@ -1,54 +1,56 @@
 <script setup>
 import { reactive } from 'vue'
 import { useAuthStore } from '@/stores/Auth.js'
-import axios from 'axios'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
+const { login, error } = useAuthStore()
 
-const { login2, error } = useAuthStore()
-// Реактивные данные
 const data = reactive({
     email: '',
     password: '',
 })
 
-// Функция для входа пользователя
-const login = () => {
-  axios.post('http://localhost:80/api/auth/login', data)
-    .then(response => {
-      console.log('Успешный вход:', response.data)
-      // Проверяем, что authStore действительно имеет метод login
-      if (typeof authStore.login === 'function') {
-        authStore.login(response.data)
-      } else {
-        console.error('Метод login не найден в хранилище authStore')
-      }
-    })
-    .catch(error => {
-      console.error('Ошибка входа:', error)
-    })
+const handleLogin = async () => {
+  const result = await login({ data: data})
+  if (result.success) {
+    router.push({ path:'/home' })
+  } else {
+    console.error('Ошибка при входе:', result.error)
+  }
 }
 
-const login3 = async () => {
-    await login2({ data: data})
-}
 
 </script>
 
 <template>
-    <div class="login">
-        <p>Добро пожаловать!</p>
-        <p>Логин</p>
-        <input v-model="data.email">
-        <p>Пароль</p>
-        <input v-model="data.password">
-        <button @click="login3" title="login">Войти</button>
+
+  <div class="d-flex align-items-center">
+    
+    <div class="mb-3">
+      <label for="exampleFormControlInput1" class="form-label">Логин</label>
+      <input v-model="data.email" type="email" class="form-control" placeholder="name@example.com">
     </div>
+    <div class="mb-3">
+      <label for="exampleFormControlInput1" class="form-label">Пароль</label>
+      <input v-model="data.password" type="password" class="form-control">
+    </div>
+    <button class="btn secondary-bg w-100" @click="handleLogin" title="login">Войти</button>
+  </div>
 </template>
 
 <style>
-    body {
-        display: flex;
-        background-color: rgb(112, 187, 186);
-        color: #000;
-    }
+ 
+  .d-flex {
+    flex-direction: column;
+    border-radius: var(--secondary-color);
+  }
+  .btn {
+    color: white;
+  }
+  .btn:hover {
+    color: var(--secondary-color);
+  }
+
+  
 </style>

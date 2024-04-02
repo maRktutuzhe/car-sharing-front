@@ -10,7 +10,7 @@ export const useAuthStore = defineStore('auth', {
     error: null,
   }),
   actions: {
-    async login2({ data }) {
+    async login({ data }) {
       try {
         const response = await axios.post('http://localhost:80/api/auth/login', data)
         console.log('Успешный вход:', response)

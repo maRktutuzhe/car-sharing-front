@@ -1,0 +1,16 @@
+:root {
+    --primary-color: #C9E3AB; /* Замените этот цвет на ваш первый выбранный цвет */
+    --secondary-color: #181F0A; /* Замените этот цвет на ваш второй выбранный цвет */
+    --accent-color: #75D18C; /* Замените этот цвет на ваш третий выбранный цвет */
+  }
+  .primary-bg {
+    background-color: var(--primary-color);
+  }
+
+  .secondary-bg {
+    background-color: var(--secondary-color);
+  }
+
+  .accent-bg {
+    background-color: var(--accent-color);
+  }
