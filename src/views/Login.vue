@@ -51,6 +51,7 @@ const handleLogin = async () => {
   .btn:hover {
     color: var(--secondary-color);
   }
-
-  
+  body {
+    justify-content: center;
+  }
 </style>

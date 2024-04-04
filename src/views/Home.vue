@@ -1,16 +1,24 @@
-<script>
-
-</script>
 <template>
-    <img src="../assets/images/green-car.jpg" alt="">
+ <div id="map" style="width: 600px; height: 400px; border: 3px, solid, red;"></div>
 </template>
-<style>
-#app {
-    padding: 0;
-    margin: 0;
-}
-img {
-    width: 100%;
+  
+  <script>
+
+export default {
+  name: 'App',
+  mounted() {
+    // Создание карты
+    ymaps.ready(() => {
+      var myMap = new ymaps.Map('map', {
+        center: [51.774390, 55.098524],
+        zoom: 13
+      });
+      
+      // Добавление маркера
+      myMap.geoObjects.add(new ymaps.Placemark([55.751574, 37.573856]));
+    });
+  }
 }
 
-</style>
+  </script>
+  
