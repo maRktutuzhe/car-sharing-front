@@ -1,6 +1,7 @@
 // Auth.js
 
 import { defineStore } from 'pinia'
+import { BaseRepository } from '@/api/BaseRepository'
 import axios from 'axios'
 
 export const useAuthStore = defineStore('auth', {
@@ -9,18 +10,30 @@ export const useAuthStore = defineStore('auth', {
     accessToken: localStorage.getItem('accessToken') || null,
     status: null,
     balance: null,
+    cars: [],
     error: null,
   }),
   actions: {
     async login({ data }) {
       try {
+        // TODO: сделать отдельную штуку для запросов, заголовки там поставить изначально взятые из pinia, все делать через pinia
         const response = await axios.post('http://localhost:80/api/auth/login', data)
         console.log('Успешный вход:', response)
         this.isLoggedIn = true
         this.accessToken = response.data.access_token
         localStorage.setItem('isLoggedIn', 'true'); // Сохраняем данные об аутентификации в localStorage
         localStorage.setItem('accessToken', this.accessToken);
-        this.error = null
+       const repos = new BaseRepository(this.accessToken)
+      //  console.log(repos)
+       try {
+
+         const cars = await repos.index('cars?include[]=location')
+         this.cars = cars
+        console.log('eeeeeeeeeeeeeeeeeee')
+         this.error = null
+        } catch {
+          console.log('fuck')
+        }
 
         try {
           const userResponse = await axios.post('http://localhost:80/api/auth/user', this.accessToken)
