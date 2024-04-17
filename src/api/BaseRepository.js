@@ -15,8 +15,16 @@ export class BaseRepository {
     async index(filter = '') {
         try {
             const response = await this.service.get(filter);
-            return response.data;
+            return response;
         } catch (error) {
+            throw new Error('Failed to fetch data from server');
+        }
+    }
+    async post(filter = '', data) {
+        try {
+            const response = await this.service.post(filter, data);
+            return response;
+        } catch (error){
             throw new Error('Failed to fetch data from server');
         }
     }

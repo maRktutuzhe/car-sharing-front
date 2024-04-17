@@ -1,10 +1,10 @@
 <script setup>
-import { reactive } from 'vue'
+import { onMounted, reactive } from 'vue'
 import { useAuthStore } from '@/stores/Auth.js'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const { login, error } = useAuthStore()
+const { login, logout } = useAuthStore()
 
 const data = reactive({
     email: '',
@@ -20,6 +20,9 @@ const handleLogin = async () => {
   }
 }
 
+onMounted(() => {
+  logout()
+})
 
 </script>
 

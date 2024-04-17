@@ -1,65 +1,86 @@
-// Auth.js
-
 import { defineStore } from 'pinia'
 import { BaseRepository } from '@/api/BaseRepository'
-import axios from 'axios'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    isLoggedIn: localStorage.getItem('isLoggedIn') === 'true', // Загружаем данные о состоянии аутентификации из localStorage
+    isLoggedIn: localStorage.getItem('isLoggedIn') === 'true', 
     accessToken: localStorage.getItem('accessToken') || null,
-    status: null,
-    balance: null,
-    cars: [],
+    status: localStorage.getItem('status') || null,
+    balance: localStorage.getItem('balance') || null,
+    cars: JSON.parse(localStorage.getItem('cars')) || [],
     error: null,
   }),
   actions: {
     async login({ data }) {
       try {
+
         // TODO: сделать отдельную штуку для запросов, заголовки там поставить изначально взятые из pinia, все делать через pinia
-        const response = await axios.post('http://localhost:80/api/auth/login', data)
+        
+        const repository = new BaseRepository()
+        const response = await repository.post('auth/login', data)
+        
         console.log('Успешный вход:', response)
         this.isLoggedIn = true
         this.accessToken = response.data.access_token
-        localStorage.setItem('isLoggedIn', 'true'); // Сохраняем данные об аутентификации в localStorage
+        localStorage.setItem('isLoggedIn', 'true')
         localStorage.setItem('accessToken', this.accessToken);
-       const repos = new BaseRepository(this.accessToken)
-      //  console.log(repos)
-       try {
+      
+        await this.userInfo()
+        await this.freeCars()
 
-         const cars = await repos.index('cars?include[]=location')
-         this.cars = cars
-        console.log('eeeeeeeeeeeeeeeeeee')
-         this.error = null
-        } catch {
-          console.log('fuck')
-        }
-
-        try {
-          const userResponse = await axios.post('http://localhost:80/api/auth/user', this.accessToken)
-          console.log(userResponse)
-          this.status = userResponse.data.status
-          this.balance = userResponse.data.balance
-          return { success: true }
-        } catch (error) {
-          console.error('Ошибка при получении данных пользователя:', error)
-          return { success: false, error: 'Ошибка при получении данных пользователя' }
-        }
+        return { success: true }
+      
       } catch (error) {
         console.error('Ошибка входа:', error)
         this.isLoggedIn = false
         this.accessToken = null
-        localStorage.removeItem('isLoggedIn'); // Если вход неудачный, удаляем данные об аутентификации из localStorage
-        localStorage.removeItem('accessToken');
+        localStorage.removeItem('isLoggedIn')
+        localStorage.removeItem('accessToken')
         this.error = error.response.data.error || 'Ошибка авторизации'
         return { success: false, error: this.error }
       }
     },
+
+    async userInfo() {
+      try {
+        const repository = new BaseRepository(this.accessToken)
+        const userResponse = await repository.post('auth/user')
+        console.log(userResponse)
+        this.status = userResponse.data.status
+        this.balance = userResponse.data.balance
+        localStorage.setItem('status', this.status) 
+        localStorage.setItem('balance', this.balance)
+        return { success: true }
+      } catch (error) {
+        console.error('Ошибка при получении данных пользователя:', error)
+        return { success: false, error: 'Ошибка при получении данных пользователя' }
+      }
+    },
+
+    async freeCars() {
+      try {
+        const repository = new BaseRepository(this.accessToken)
+        const carsResponse = await repository.index('cars?include[]=location')
+        this.cars = carsResponse.data
+        localStorage.setItem('cars', JSON.stringify(this.cars))
+        this.error = null
+        return { success: true }
+      } catch {
+        console.log('fuck')
+      }
+    },
+
     logout() {
       this.isLoggedIn = false
       this.accessToken = null
-      localStorage.removeItem('isLoggedIn'); // Удаляем данные об аутентификации из localStorage при выходе из системы
-      localStorage.removeItem('accessToken');
+      this.status = null
+      this.balance = null
+      this.cars = []
+      localStorage.removeItem('isLoggedIn')
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('status')
+      localStorage.removeItem('balance')
+      localStorage.removeItem('cars')
     },
   },
 })
