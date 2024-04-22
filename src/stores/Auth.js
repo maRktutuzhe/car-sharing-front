@@ -14,8 +14,6 @@ export const useAuthStore = defineStore('auth', {
     async login({ data }) {
       try {
 
-        // TODO: сделать отдельную штуку для запросов, заголовки там поставить изначально взятые из pinia, все делать через pinia
-        
         const repository = new BaseRepository()
         const response = await repository.post('auth/login', data)
         
@@ -45,7 +43,6 @@ export const useAuthStore = defineStore('auth', {
       try {
         const repository = new BaseRepository(this.accessToken)
         const userResponse = await repository.post('auth/user')
-        console.log(userResponse)
         this.status = userResponse.data.status
         this.balance = userResponse.data.balance
         localStorage.setItem('status', this.status) 

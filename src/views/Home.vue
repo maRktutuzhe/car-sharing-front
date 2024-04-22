@@ -2,26 +2,31 @@
 import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/Auth'
 import { useRepository } from '@/api/Repository'
+import { YandexMap, YandexMapDefaultSchemeLayer, YandexMapDefaultFeaturesLayer, YandexMapMarker } from 'vue-yandex-maps';
 
 const store = useAuthStore()
+const markers = []
+
+const handleClick = (event) => console.log(event);
 
 const showMap = (data) => {
-  ymaps.ready(() => {
-    let myMap = new ymaps.Map('map', {
-      center: [51.774390, 55.098524],
-      zoom: 13
-    });
-    data.forEach(function(element) {
-      myMap.geoObjects.add(new ymaps.Placemark([element.location.coordinates[0], element.location.coordinates[1]]));
-    });
-  });
+  data.forEach(function(element) {
+    const coordinates = [
+      element.location.coordinates[1],
+      element.location.coordinates[0]
+    ]
+    markers.push(
+      {
+        coordinates: coordinates,
+        onClick: handleClick,
+      }
+    )
+  })
 }
 
 const fetchCarsLocations = async () => {
   try {
-    console.log('suka')
     const res = useRepository.index('cars?include[]=location')
-    console.log(res.data)
     showMap(res.data)
     return { success: true, data: res.data };
   } catch (error) {
@@ -31,16 +36,11 @@ const fetchCarsLocations = async () => {
 }
 
 onMounted(() => {
-  console.log(store.cars)
-  console.log(localStorage)
   if (store.cars == []) {
     fetchCarsLocations()
     .then(response => {
       if (response.success) {
         const data = response.data
-        console.log('data')
-    console.log(data)
-
         showMap(data)
       } else {
         console.error('Произошла ошибка:', response.error);
@@ -50,8 +50,6 @@ onMounted(() => {
       console.error('Произошла ошибка при запросе:', error);
     });
   } else {
-    console.log('cars')
-    console.log(store.cars.data)
     showMap(store.cars.data)
   }
 });
@@ -61,8 +59,40 @@ onMounted(() => {
 </script>
   
 <template>
-  // TODO: карты делать через iframe
-  // постараться подключить через модули(библиотеки) отказаться от подключения по скрипту
-  // сделать файлик .env, там писать переменные для подключения (яндекс апи ключ, адрес локал хоста)
-  <div id="map" style="width: 600px; height: 400px; border: 3px, solid, red;"></div>
+  <yandex-map
+      :settings="{
+        location: {
+          center: [ 55.098524, 51.774390],
+          zoom: 13
+        },
+      }"
+      width="100%"
+      height="500px"
+  >
+    <yandex-map-default-scheme-layer/>
+    <yandex-map-default-features-layer/>
+    <yandex-map-marker
+      v-for="(marker, index) in markers"
+      :key="index"
+      :settings="marker"
+    >
+      <div class="marker"/>
+    </yandex-map-marker>
+  </yandex-map>
 </template>
+
+<style scoped>
+  .marker {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    background: #ff0000;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    color: #fff;
+    font-weight: bold;
+    line-height: 20px;
+  }
+</style>

@@ -3,7 +3,7 @@ import axios from 'axios'
 export class BaseRepository {
     constructor(token) {
         this.service = axios.create({
-            baseURL: 'http://localhost:80/api/',
+            baseURL: import.meta.env.VITE_APP_BASE_API,
             headers: token
               ? {
                   Authorization: `Bearer ${token}`,
