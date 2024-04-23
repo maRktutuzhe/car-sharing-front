@@ -1,24 +1,36 @@
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useAuthStore } from '@/stores/Auth'
 import { useRepository } from '@/api/Repository'
 import { YandexMap, YandexMapDefaultSchemeLayer, YandexMapDefaultFeaturesLayer, YandexMapMarker } from 'vue-yandex-maps';
+import Balloon from '../components/Balloon.vue';
 
 const store = useAuthStore()
 const markers = []
+const openMarker = ref(null);
 
-const handleClick = (event) => console.log(event);
-
+const closeModal = () => {
+  openMarker.value = false;
+}
+const handleMarkerClick = (index) => {
+  openMarker.value = index;
+};
 const showMap = (data) => {
+ 
   data.forEach(function(element) {
     const coordinates = [
       element.location.coordinates[1],
       element.location.coordinates[0]
     ]
+   
     markers.push(
       {
+        id: element.id,
+        number: element.number,
+        color: element.color,
         coordinates: coordinates,
-        onClick: handleClick,
+        name: element.name,
+        carmake_id: element.carmake_id
       }
     )
   })
@@ -50,11 +62,10 @@ onMounted(() => {
       console.error('Произошла ошибка при запросе:', error);
     });
   } else {
+    console.log('oke')
     showMap(store.cars.data)
   }
 });
-
-
   
 </script>
   
@@ -66,7 +77,7 @@ onMounted(() => {
           zoom: 13
         },
       }"
-      width="100%"
+      width="500px"
       height="500px"
   >
     <yandex-map-default-scheme-layer/>
@@ -74,14 +85,39 @@ onMounted(() => {
     <yandex-map-marker
       v-for="(marker, index) in markers"
       :key="index"
-      :settings="marker"
-    >
-      <div class="marker"/>
+      :settings="{ coordinates: marker.coordinates, onClick: () => handleMarkerClick(index), zIndex: openMarker === index ? 1 : 0 }"
+      >
+      <div class="marker"> 
+      <Balloon 
+        :visible="openMarker === index"
+        v-if="openMarker === index"
+        :data="marker"
+        @closeModal="closeModal"
+        />
+    </div>
     </yandex-map-marker>
+
   </yandex-map>
 </template>
 
 <style scoped>
+.marker-popup {
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px;
+  color: black;
+  cursor: pointer;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.popup {
+  position: absolute;
+  top: calc(100% + 10px);
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px;
+  color: black;
+}
   .marker {
     position: relative;
     width: 20px;
@@ -95,4 +131,12 @@ onMounted(() => {
     font-weight: bold;
     line-height: 20px;
   }
+  .yandex-container {
+  height: 400px;
+}
+
+.yandex-balloon {
+  height: 200px;
+  width: 200px;
+}
 </style>
