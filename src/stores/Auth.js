@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia'
 import { BaseRepository } from '@/api/BaseRepository'
+import API from "@/api/Api.js";
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    isLoggedIn: localStorage.getItem('isLoggedIn') === 'true', 
+    isLoggedIn: localStorage.getItem('isLoggedIn') === 'true',
     accessToken: localStorage.getItem('accessToken') || null,
     status: localStorage.getItem('status') || null,
     balance: localStorage.getItem('balance') || null,
@@ -14,20 +15,21 @@ export const useAuthStore = defineStore('auth', {
     async login({ data }) {
       try {
 
-        const repository = new BaseRepository()
-        const response = await repository.post('auth/login', data)
-        
+        const response = await API.post('auth/login', data)
+
         console.log('Успешный вход:', response)
         this.isLoggedIn = true
         this.accessToken = response.data.access_token
         localStorage.setItem('isLoggedIn', 'true')
         localStorage.setItem('accessToken', this.accessToken);
-        
+
+        API.defaults.headers.common['Authorization'] = `Bearer ${this.accessToken}`
+
         await this.userInfo()
         await this.freeCars()
 
         return { success: true }
-      
+
       } catch (error) {
         console.error('Ошибка входа:', error)
         this.isLoggedIn = false
@@ -45,7 +47,7 @@ export const useAuthStore = defineStore('auth', {
         const userResponse = await repository.post('auth/user')
         this.status = userResponse.data.status
         this.balance = userResponse.data.balance
-        localStorage.setItem('status', this.status) 
+        localStorage.setItem('status', this.status)
         localStorage.setItem('balance', this.balance)
         return { success: true }
       } catch (error) {
@@ -78,6 +80,8 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('status')
       localStorage.removeItem('balance')
       localStorage.removeItem('cars')
+
+      API.defaults.headers.common['Authorization'] = undefined
     },
   },
 })

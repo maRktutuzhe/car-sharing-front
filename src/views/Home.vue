@@ -1,7 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useAuthStore } from '@/stores/Auth'
-import { useRepository } from '@/api/Repository'
 import { YandexMap, YandexMapDefaultSchemeLayer, YandexMapDefaultFeaturesLayer, YandexMapMarker } from 'vue-yandex-maps';
 import Balloon from '../components/Balloon.vue';
 
@@ -15,9 +14,9 @@ const closeModal = () => {
 const handleMarkerClick = (index) => {
   openMarker.value = index;
 };
+
 const showMap = (data) => {
- 
-  data.forEach(function(element) {
+  data.forEach(element => {
     const coordinates = [
       element.location.coordinates[1],
       element.location.coordinates[0]
@@ -37,9 +36,8 @@ const showMap = (data) => {
 
 const fetchCarsLocations = async () => {
   try {
-    const res = useRepository.index('cars?include[]=location')
-    showMap(res.data)
-    return { success: true, data: res.data };
+    const res = await new BaseRepository().index('cars?include[]=location')
+    return { success: true, data: res.data.data };
   } catch (error) {
     console.error('Ошибка при получении данных:', error)
     return { success: false, error: 'Ошибка при получении данных' }
@@ -65,9 +63,9 @@ onMounted(() => {
   //   showMap(store.cars.data)
   // }
 });
-  
+
 </script>
-  
+
 <template>
   <yandex-map
       :settings="{
@@ -86,8 +84,8 @@ onMounted(() => {
       :key="index"
       :settings="{ coordinates: marker.coordinates, onClick: () => handleMarkerClick(index), zIndex: openMarker === index ? 1 : 0 }"
       >
-      <div class="marker"> 
-      <Balloon 
+      <div class="marker">
+      <Balloon
         :visible="openMarker === index"
         v-if="openMarker === index"
         :data="marker"

@@ -1,31 +1,18 @@
-import axios from 'axios'
+import API from "@/api/Api.js";
 
 export class BaseRepository {
-    constructor(token) {
-        this.service = axios.create({
-            baseURL: import.meta.env.VITE_APP_BASE_API,
-            headers: token
-              ? {
-                  Authorization: `Bearer ${token}`,
-                  Accept: 'application/json',
-                }
-              : {},
-          });
-        }
     async index(filter = '') {
         try {
-            const response = await this.service.get(filter);
-            return response;
+            return await API.get(filter);
         } catch (error) {
             throw new Error('Failed to fetch data from server');
         }
     }
     async post(filter = '', data) {
         try {
-            const response = await this.service.post(filter, data);
-            return response;
+            return await API.post(filter, data);
         } catch (error){
             throw new Error('Failed to fetch data from server');
         }
     }
-} 
+}

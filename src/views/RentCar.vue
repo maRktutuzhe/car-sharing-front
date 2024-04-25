@@ -21,7 +21,7 @@ const fetchCar = async () => {
 onMounted(() => {
     console.log("router")
     console.log(route.params.id)
-    car = fetchCar()
+    car.value = fetchCar()
     console.log(car)
 })
 
@@ -30,6 +30,7 @@ onMounted(() => {
 
 <template>
 
-    <h2>{{ car }}</h2>
+    <pre>{{car}}</pre>
+<!--    <h2>{{ car }}</h2>-->
 
 </template>
