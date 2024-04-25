@@ -1,4 +1,7 @@
 import { BaseRepository } from '@/api/BaseRepository'
 import { useAuthStore } from '@/stores/Auth'
-
-export const useRepository = new BaseRepository(useAuthStore.accessToken)
+console.log('hui')
+class Repository extends BaseRepository {}
+// const store = useAuthStore()
+// console.log(store)
+export const useRepository = new Repository(useAuthStore.accessToken)

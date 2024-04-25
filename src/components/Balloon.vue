@@ -1,10 +1,22 @@
 <script setup>
-  defineProps({
+
+import { useRouter } from 'vue-router';
+
+defineProps({
     data: Object,
     visible: Boolean
-  });
-  const emit = defineEmits(['closeModal'])
-  const closeModal = () => {
+});
+
+const router = useRouter()
+
+const rentCar = (data) => {
+  console.log(data)
+    router.push({ path:'/rent/'+data.id})
+}   
+
+const emit = defineEmits(['closeModal'])
+
+const closeModal = () => {
     emit('closeModal')
 }
 </script>
@@ -14,8 +26,8 @@
         <p>Name: {{ data.name }}</p>
         <p>Color: {{ data.color }}</p>
         <p>Number: {{ data.number }}</p>
-      <button >Арендовать</button>
-      <button @click="closeModal" mode="primary">Закрыть</button>
+      <button @click="rentCar(data)">Арендовать</button>
+      <button @click="closeModal(data)" mode="primary">Закрыть</button>
     </div>
 </template>
 

@@ -22,7 +22,6 @@ const showMap = (data) => {
       element.location.coordinates[1],
       element.location.coordinates[0]
     ]
-   
     markers.push(
       {
         id: element.id,
@@ -48,7 +47,7 @@ const fetchCarsLocations = async () => {
 }
 
 onMounted(() => {
-  if (store.cars == []) {
+  // if (store.cars == []) {
     fetchCarsLocations()
     .then(response => {
       if (response.success) {
@@ -61,10 +60,10 @@ onMounted(() => {
     .catch(error => {
       console.error('Произошла ошибка при запросе:', error);
     });
-  } else {
-    console.log('oke')
-    showMap(store.cars.data)
-  }
+  // } else {
+  //   console.log('oke')
+  //   showMap(store.cars.data)
+  // }
 });
   
 </script>

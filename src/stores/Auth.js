@@ -22,7 +22,7 @@ export const useAuthStore = defineStore('auth', {
         this.accessToken = response.data.access_token
         localStorage.setItem('isLoggedIn', 'true')
         localStorage.setItem('accessToken', this.accessToken);
-      
+        
         await this.userInfo()
         await this.freeCars()
 
