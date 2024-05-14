@@ -1,10 +1,9 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { useAuthStore } from '@/stores/Auth'
+import { BaseRepository } from '@/api/BaseRepository';
 import { YandexMap, YandexMapDefaultSchemeLayer, YandexMapDefaultFeaturesLayer, YandexMapMarker } from 'vue-yandex-maps';
 import Balloon from '../components/Balloon.vue';
 
-const store = useAuthStore()
 const markers = []
 const openMarker = ref(null);
 
@@ -32,6 +31,7 @@ const showMap = (data) => {
       }
     )
   })
+  console.log(markers)
 }
 
 const fetchCarsLocations = async () => {
@@ -44,24 +44,14 @@ const fetchCarsLocations = async () => {
   }
 }
 
-onMounted(() => {
-  // if (store.cars == []) {
-    fetchCarsLocations()
-    .then(response => {
-      if (response.success) {
-        const data = response.data
-        showMap(data)
-      } else {
-        console.error('Произошла ошибка:', response.error);
-      }
-    })
-    .catch(error => {
-      console.error('Произошла ошибка при запросе:', error);
-    });
-  // } else {
-  //   console.log('oke')
-  //   showMap(store.cars.data)
-  // }
+onMounted(async() => {
+    const response = await fetchCarsLocations();
+  if (response.success) {
+    const data = response.data;
+    showMap(data);
+  } else {
+    console.error('Произошла ошибка:', response.error);
+  }
 });
 
 </script>
