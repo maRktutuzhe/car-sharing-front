@@ -57,14 +57,27 @@ const showMap = () => {
 // не работает взятие в аренду
 const start = async (rent) => {
   try {
-    const res = await useRepository.post('rents/', rent)
-    // console.log("супер! аренда началась")
-    return { success: true, data: res.data.data };
+    const res = await useRepository.post('rents', rent);
+    return { success: true, data: res.data };
   } catch (error) {
-    console.error('Ошибка при получении данных:', error)
-    return { success: false, error: 'Ошибка при получении данных' }
+    console.error('Полная ошибка:', error);
+
+    if (error.response) {
+      console.error('Ответ сервера:', error.response);
+      if (error.response.data && error.response.data.error) {
+        console.error('Ошибка от сервера:', error.response.data.error);
+        return { success: false, error: error.response.data.error };
+      } else {
+        console.error('Неизвестная ошибка сервера:', error.response.data);
+        return { success: false, error: 'Неизвестная ошибка сервера' };
+      }
+    } else {
+      console.error('Ошибка при получении данных:', error.message);
+      return { success: false, error: 'Ошибка при получении данных' };
+    }
   }
-}
+};
+
 
 const startRent = async () => {
   const userResponse = await useRepository.post('auth/user')
@@ -76,15 +89,16 @@ const startRent = async () => {
     petrol: car.value.rent.petrol,
     kilometer: car.value.rent.kilometer
   }
-  const response = await start(rent)
-  if (response.success) {
-    alert("приятной поездки!")
-    console.log("response.data")
-    console.log(response)
-    // car.value = response.data
-    // showMap();
+  const result = await start(rent);
+
+  if (result.success) {
+    if("error" in result.data) {
+      alert(result.data.error)
+    }
+    console.log("Аренда началась!", result.data);
   } else {
-    console.error('Произошла ошибка:', response.error);
+    console.error("Произошла ошибка:", result.error);
+    alert(result.error);  // Вы можете показать сообщение об ошибке пользователю
   }
 }
 
@@ -98,13 +112,16 @@ const endRent = async () => {
     petrol: car.value.rent.petrol,
     kilometer: car.value.rent.kilometer
   }
-  try {
-    const res = await useRepository.post('rents/', rent)
-    console.log("супер! аренда началась")
-    return { success: true, data: res.data.data };
-  } catch (error) {
-    console.error('Ошибка при получении данных:', error)
-    return { success: false, error: 'Ошибка при получении данных' }
+  const result = await start(rent);
+
+  if (result.success) {
+    if("error" in result.data) {
+      alert(result.data.error)
+    }
+    console.log("Аренда окончена!", result.data);
+  } else {
+    console.error("Произошла ошибка:", result.error);
+    alert(result.error);  // Вы можете показать сообщение об ошибке пользователю
   }
 }
 
@@ -155,7 +172,7 @@ onMounted(async() => {
     <yandex-map-marker
       v-for="(marker, index) in markers"
       :key="index"
-      :settings="{ coordinates: marker.coordinates, onClick: () => handleMarkerClick(index), zIndex: openMarker === index ? 1 : 0 }"
+      :settings="{ coordinates: marker.coordinates }"
       >
       <div class="marker">
     </div>
