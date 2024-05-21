@@ -3,6 +3,7 @@ import { useRepository } from '@/api/Repository'
 import { onMounted, ref } from 'vue';
 
 const clusters = ref({})
+const clusterColors = ['blue', 'green', 'orange', 'purple'];
 
 const getClusterDescription = (index) => {
     const descriptions = [
@@ -55,42 +56,94 @@ onMounted(async () => {
     const res = await (fetchData())
     clusters.value = res.data
     console.log(clusters.value)
+   
+    // Prepare data for charts
     const points = clusters.value['data'];
-        const balanceVsPenalties = points.map(point => ({ x: point[1], y: point[0] }));
-    createChart(document.getElementById('chart1'), balanceVsPenalties, 'Зависимость баланса от штрафов', 'Штрафы', 'Баланс');
-})
+    const centroids = clusters.value['centroids'];
+
+    // Create datasets for each cluster
+
+    const datasetsBalanceVsPenalties = clusters.value['clusters'].map((cluster, index) => ({
+        label: `Кластер ${index + 1}`,
+        lol: cluster,
+        data: cluster.map(point => ({ x: point["data"][1], y: point["data"][0] })),
+        backgroundColor: clusterColors[index]
+    }));
+
+    const datasetsBalanceVsTrips = clusters.value['clusters'].map((cluster, index) => ({
+        label: `Кластер ${index + 1}`,
+        data: cluster.map(point => ({ x: point["data"][2], y: point["data"][0] })),
+        backgroundColor: clusterColors[index]
+    }));
+
+    const datasetsPenaltiesVsTrips = clusters.value['clusters'].map((cluster, index) => ({
+        label: `Кластер ${index + 1}`,
+        data: cluster.map(point => ({ x: point["data"][2], y: point["data"][1] })),
+        backgroundColor: clusterColors[index]
+    }));
+
+    // Add centroids to each chart
+    datasetsBalanceVsPenalties.push({
+        label: 'Центроиды',
+        data: centroids.map(centroid => ({ x: centroid[1], y: centroid[0] })),
+        backgroundColor: 'red',
+        pointStyle: 'triangle',
+        radius: 10
+    });
+
+    datasetsBalanceVsTrips.push({
+        label: 'Центроиды',
+        data: centroids.map(centroid => ({ x: centroid[2], y: centroid[0] })),
+        backgroundColor: 'red',
+        pointStyle: 'triangle',
+        radius: 10
+    });
+
+    datasetsPenaltiesVsTrips.push({
+        label: 'Центроиды',
+        data: centroids.map(centroid => ({ x: centroid[2], y: centroid[1] })),
+        backgroundColor: 'red',
+        pointStyle: 'triangle',
+        radius: 10
+    });
+
+    // Create charts
+    createChart(document.getElementById('chart1'), datasetsBalanceVsPenalties, 'Зависимость баланса от штрафов', 'Штрафы', 'Баланс');
+    createChart(document.getElementById('chart2'), datasetsBalanceVsTrips, 'Зависимость баланса от поездок', 'Поездки', 'Баланс');
+    createChart(document.getElementById('chart3'), datasetsPenaltiesVsTrips, 'Зависимость штрафов от поездок', 'Поездки', 'Штрафы');
+
+
+  })
 
 // Создание графика
-const createChart = (context, data, label, xLabel, yLabel) => {
+const createChart = (context, datasets, label, xLabel, yLabel) => {
     return new Chart(context, {
         type: 'scatter',
         data: {
-            datasets: [{
-                label: label,
-                data: data,
-                backgroundColor: 'blue'
-            }]
+            datasets: datasets
         },
         options: {
-            title: {
-                display: true,
-                text: label
+            plugins: {
+                title: {
+                    display: true,
+                    text: label
+                }
             },
             scales: {
-                xAxes: [{
+                x: {
                     type: 'linear',
                     position: 'bottom',
-                    scaleLabel: {
+                    title: {
                         display: true,
-                        labelString: xLabel
+                        text: xLabel
                     }
-                }],
-                yAxes: [{
-                    scaleLabel: {
+                },
+                y: {
+                    title: {
                         display: true,
-                        labelString: yLabel
+                        text: yLabel
                     }
-                }]
+                }
             }
         }
     });
@@ -99,9 +152,23 @@ const createChart = (context, data, label, xLabel, yLabel) => {
 </script>
 
 <template>
-  <div>
+  <div class="charts">
+
+    <div class="chart"> 
+      
+      <canvas id="chart1" style="width: 500px; height: 400px;"></canvas>
+    </div>
+    <div class="chart"> 
+      
+      <canvas id="chart2" style="width: 500px; height: 400px;"></canvas>
+    </div>
+    
+    <div class="chart"> 
+      
+      <canvas id="chart3" style="width: 500px; height: 400px;"></canvas>
+    </div>
   </div>
-  <canvas id="chart1"></canvas>
+  <div>
     <div v-for="(cluster, index) in clusters['clusters']" :key="index" class="cluster">
       <h2>Кластер {{ index + 1 }}</h2>
       <p class="cluster-description">{{ getClusterDescription(index) }}</p>
@@ -136,10 +203,23 @@ const createChart = (context, data, label, xLabel, yLabel) => {
         </div>
       </div>
     </div>
-  <!-- </div> -->
+  </div>
 </template>
 
 <style scoped>
+.charts {
+  width: 1200px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+.chart{
+  display: flex;
+  flex-wrap: wrap;
+  width: 400px;
+  height: 400px;
+}
+
 .cluster {
   margin-top: 10px;
   margin-bottom: 10px;
