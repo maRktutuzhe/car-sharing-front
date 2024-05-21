@@ -61,45 +61,40 @@ onMounted(async () => {
 })
 
 // Создание графика
-if (clusters.value) {
-  console.log(clusters)
-  console.log("dfkknksljfhbj")
-const chart1 = new Chart(document.getElementById('chart1'), {
-    type: 'scatter',
-    data: {
-        datasets: [{
-            label: 'Пользователи',
-            data: clusters.value['data'].map(function(point) {
-                return { x: point[1], y: point[0] };
-            }),
-            backgroundColor: 'blue' // Цвет точек
-        }]
-    },
-    options: {
-        title: {
-            display: true,
-            text: 'Зависимость баланса от штрафов'
-        },
-        scales: {
-            xAxes: [{
-                type: 'linear',
-                position: 'bottom',
-                scaleLabel: {
-                    display: true,
-                    labelString: 'Штрафы'
-                }
-            }],
-            yAxes: [{
-                scaleLabel: {
-                    display: true,
-                    labelString: 'Баланс'
-                }
+const createChart = (context, data, label, xLabel, yLabel) => {
+    return new Chart(context, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: label,
+                data: data,
+                backgroundColor: 'blue'
             }]
+        },
+        options: {
+            title: {
+                display: true,
+                text: label
+            },
+            scales: {
+                xAxes: [{
+                    type: 'linear',
+                    position: 'bottom',
+                    scaleLabel: {
+                        display: true,
+                        labelString: xLabel
+                    }
+                }],
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: yLabel
+                    }
+                }]
+            }
         }
-    }
-});
+    });
 }
-
 
 </script>
 
