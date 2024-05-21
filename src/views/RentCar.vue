@@ -94,8 +94,11 @@ const startRent = async () => {
   if (result.success) {
     if("error" in result.data) {
       alert(result.data.error)
+    } else {
+      alert("Удачной поездки!")
+
+      console.log("Аренда началась!", result.data);
     }
-    console.log("Аренда началась!", result.data);
   } else {
     console.error("Произошла ошибка:", result.error);
     alert(result.error);  // Вы можете показать сообщение об ошибке пользователю
@@ -117,8 +120,10 @@ const endRent = async () => {
   if (result.success) {
     if("error" in result.data) {
       alert(result.data.error)
+    } else {
+      alert("Поездка окончена!")
+      console.log("Аренда окончена !", result.data);
     }
-    console.log("Аренда окончена!", result.data);
   } else {
     console.error("Произошла ошибка:", result.error);
     alert(result.error);  // Вы можете показать сообщение об ошибке пользователю
