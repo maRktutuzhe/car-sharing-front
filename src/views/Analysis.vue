@@ -3,7 +3,7 @@ import { useRepository } from '@/api/Repository'
 import { onMounted, ref } from 'vue';
 
 const clusters = ref({})
-const clusterColors = ['blue', 'green', 'orange', 'purple'];
+const clusterColors = ['OrangeRed', 'Chocolate', 'SaddleBrown', 'BurlyWood'];
 
 const getClusterDescription = (index) => {
     const descriptions = [
@@ -168,6 +168,28 @@ const createChart = (context, datasets, label, xLabel, yLabel) => {
       <canvas id="chart3" style="width: 500px; height: 400px;"></canvas>
     </div>
   </div>
+  <h4>
+
+    Коэффициент силуэта = {{ clusters["silhouette"] }}
+  </h4>
+  <h5>
+    Коэффициент силуэта является мерой того, насколько хорошо точки данных в кластере сгруппированы вместе по сравнению с точками в других кластерах. Он рассчитывается для каждой точки и затем усредняется для всех точек в наборе данных.
+  </h5>
+  <h6>
+    Интерпретация значений силуэта:
+    </h6>
+    <h6>
+
+      1: Точка идеально сгруппирована с другими точками в своём кластере и далеко от точек в других кластерах.
+    </h6>
+    <h6>
+      0: Точка на границе между двумя кластерами.
+      
+    </h6>
+    <h6>
+      -1: Точка, вероятно, была помещена в неправильный кластер.
+      
+    </h6>
   <div>
     <div v-for="(cluster, index) in clusters['clusters']" :key="index" class="cluster">
       <h2>Кластер {{ index + 1 }}</h2>
@@ -207,6 +229,11 @@ const createChart = (context, datasets, label, xLabel, yLabel) => {
 </template>
 
 <style scoped>
+
+h4, h5, h6 {
+  margin-left: 20px;
+}
+
 .charts {
   width: 1200px;
   display: flex;
